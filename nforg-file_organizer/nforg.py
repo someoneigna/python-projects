@@ -39,33 +39,21 @@ def change_dir(directory):
         try:
             os.chdir(directory)
         except IOError:
-            print("Cant access %s...\n" % directory)
+            print("Cant access {0}...\n".format(directory))
     return os.getcwd()
 
-def optimize(orig_filetypes):
+def optimize(filetypes):
     """For current dir scan valid filetypes
         return a list of valid filetypes"""
 
-    #Phase 1: remove repeated, skip if "*"
-    if orig_filetypes == "*":
-        return orig_filetypes
-    filetypes = []
-    for filetype in orig_filetypes:
-        if filetype not in filetypes:
-            filetypes.append(filetype)
+    #Remove repeated, skip if "*"
+    if filetypes == "*":
+        return ['*']
 
-    return filetypes
-
-
-
-def append_delimiter(words, delimiter):
-    """Append delimiter in word list"""
-
-    # Used if organize_x() was called skipping get_filetypes(arg)
-    if delimiter not in words:
-        for i, word in enumerate(words):
-            words[i] = "." + word[i]
-
+    #Return elements not repeated
+    result = []
+    [result.append(x) for x in filetypes if x not in result]
+    return result
 
 def check_for_file(fname):
     """Checks if it's a valid file"""
@@ -79,7 +67,7 @@ def get_dict_list(mode):
     """Generates a dictionary with a mode to valid keys to match"""
 
     letters = string.ascii_lowercase
-    numbers_plus_letters = string.digits + string.ascii_lowercase
+    numbers_plus_letters = ''.join(string.digits + string.ascii_lowercase)
 
     mode_to_container = {"-n":letters, "-n+":numbers_plus_letters}
     return mode_to_container[mode]
@@ -94,9 +82,11 @@ def fix_repeated(file_a, file_b, directory):
     else:
         # else we save rename and append -diff in route/'filename + diff'
         backup_filename = file_a + "-diff"
-        print("Saving as: %s\n" %(directory + backup_filename))
+        fullroute = directory + backup_filename
+        
+        print("Saving as: {fullroute}\n".format(fullroute=fullroute))
         os.rename(file_a, backup_filename)
-        shutil.move(backup_filename, directory + backup_filename)
+        shutil.move(backup_filename, fullroute)
 
 
 def move_file(fname, directory):
@@ -104,12 +94,13 @@ def move_file(fname, directory):
 
     try:
         if DEBUG_MODE:
-            print("Moving \'%s\' ----> \'%s\'" %(fname, directory + fname))
+            print("Moving \'{origin}\' ----> \'{destiny}\'".format(origin=fname, destiny= directory + fname))
         shutil.move(fname, directory)
 
     except shutil.Error:
-        print("%s already exists, skipping...\n" % (directory + fname))
-        fix_repeated(fname, directory + fname, directory)
+        fullpath = directory + fname
+        print("{fullpath} already exists, skipping...\n".format(fullpath=fullpath))
+        fix_repeated(fname, fullpath, directory)
 
 
 def organize_by_symbols(orig_filetypes, directory):
@@ -148,30 +139,24 @@ def organize_by_name(orig_filetypes, mode, directory):
 
     filetypes = optimize(orig_filetypes)
     files_processed = 0
-
-
-    mode_dict = get_dict_list(mode)
-    mode_folders = mode_dict.upper()
-    alphanumeric = mode_dict + mode_folders
-
-    if not(mode_dict) or not(mode_folders):
-        print("Invalid letters for comparision\n")
-        raise IndexError
-
-
+    
     # For every chosen filetype
     for filetype in filetypes:
-        # For every letter
-        for letter in alphanumeric:
-            # For every file on dir
-            for fname in glob.glob(letter + "*." + filetype):
-                files_processed += 1
+       
+        # For every file on dir
+        match = ''.join("[A-Za-z0-9]*" + "." + filetype)
+        
+        for fname in glob.iglob(match):
+            files_processed += 1
 
-                # If folder for current letter doesn't exists
-                if os.path.exists(letter.upper() + "/") == False:
-                    os.mkdir(letter.upper())
+            # If folder for current letter doesn't exists
+            dir_letter = fname[0].upper()
+            directory = dir_letter + "/"
+            
+            if os.path.exists(directory) == False:
+                os.mkdir(dir_letter)
 
-                move_file(fname, letter.upper() + "/")
+            move_file(fname, directory)
 
     if current_dir <> directory:
         change_dir("..")
@@ -197,20 +182,16 @@ def organize_by_filetype(orig_filetypes, directory):
         for fname in glob.glob("*." + ftype):
 
             files_processed += 1
-            if filetypes == "*":
-                if DEBUG_MODE:
-                    print(fname.rsplit(".")[1] + "\n")
+            
+            #Get filetype from filename
+            filetype = fname.partition(".")[2]
 
-                # If folder for current file filetype doesn't exists
-                if os.path.exists( fname.rsplit(".")[1] + "/") == False :
-                    os.mkdir( fname.rsplit(".")[1] )
-                move_file(fname, fname.rsplit(".")[1] + "/")
+            # If folder for current file filetype doesn't exists
+            dirname = filetype + "/" 
+            if os.path.exists(dirname) == False :
+                os.mkdir(filetype)
+            move_file(fname, dirname)
 
-            else:
-                # If folder for current filetype doesn't exists
-                if os.path.exists( ftype + "/") == False :
-                    os.mkdir( ftype )
-                move_file(fname, ftype + "/")
 
         #for end
     # for end
@@ -243,21 +224,27 @@ def classificate_dir(mode, filetypes, directory, dates=0):
         print("No files were organized. Ending...")
     else:
         if(files_classified > 1):
-            file_str = "file"
-        else:
             file_str = "files"
-
-        print("""\
-        \n %d %s were organized.\n\n  \
-                Started at:\n\t%s\n  \
-                Ended at:\n\t%s\n""" \
-                % (files_classified, file_str, init_time, time.ctime()))
+        else:
+            file_str = "file"
+        
+        entries = {
+                    'quantity': files_classified, 'files': file_str,
+                    'start': init_time, 'end': time.ctime()
+                  }
+        #I really have to improve this
+        message = """\n {0} {1} were organized.\n\n\
+                Started at:\n\t{2}\n  \
+                Ended at:\n\t{3}\n""".format(files_classified, file_str, init_time, time.ctime()) #I wish passing 'entries' would be possible :'(
+        print(message)
 
 
 def print_help():
     """Print help string"""
 
     indent = "\t  "
+
+    #Improve this calamity xD
     help_string = """nforg.py - A file organizer in python -\n\
             Arguments: nforg.py <mode> <filetypes> <dir>\n\
             Example: nforg.py -n \"pdf,png,txt\" .\n\n\
@@ -301,13 +288,10 @@ def get_filetypes(arg):
         return "*"
 
     else:
-        filetype_list = []
         filetypes = arg.split(",")
+        return filetypes
 
-        for element in filetypes:
-            filetype_list.append(element)
-
-    return filetype_list
+    return "ERROR"
 
 
 def get_dates(line):

@@ -177,6 +177,8 @@ def test_nforg():
     if DEBUG_MODE:
         print("Cleaning folder to restart.\n")
     clean_files(test_dir)
+    if len(test_files) > 0:
+        print("ERROR: file quantity not 0 after cleanup")
 
     if DEBUG_MODE:
         print("Generating files for second test.\n")
