@@ -63,16 +63,6 @@ def check_for_file(fname):
             (fname == sys.argv[0]))
 
 
-def get_dict_list(mode):
-    """Generates a dictionary with a mode to valid keys to match"""
-
-    letters = string.ascii_lowercase
-    numbers_plus_letters = ''.join(string.digits + string.ascii_lowercase)
-
-    mode_to_container = {"-n":letters, "-n+":numbers_plus_letters}
-    return mode_to_container[mode]
-
-
 def fix_repeated(file_a, file_b, directory):
     """Reacts on existing files, removing or saving with a different name """
 
