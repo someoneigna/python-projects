@@ -102,19 +102,19 @@ def organize_by_symbols(orig_filetypes, directory):
 
     files_processed = 0
     valid = "$()=-_"
+    
+    for filetype in filetypes:
+        match = ''.join("[$()=-_]*" + "." + filetype)
+        # For matched file in dir
+        for fname in glob.iglob(match):
 
-    for char in valid:
-        for filetype in filetypes:
-            # For matched file in dir
-            for fname in glob.glob(char + "*." + filetype):
+            files_processed += 1
 
-                files_processed += 1
+            # If folder for current letter doesn't exists
+            if os.path.exists("#misc-symbols" + "/") == False :
+                os.mkdir("#misc-symbols")
 
-                # If folder for current letter doesn't exists
-                if os.path.exists("#misc-symbols" + "/") == False :
-                    os.mkdir("#misc-symbols")
-
-                move_file(fname,"#misc-symbols" + "/")
+            move_file(fname,"#misc-symbols" + "/")
 
     if current_dir <> directory:
         change_dir("..")

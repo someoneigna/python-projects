@@ -5,6 +5,8 @@
   <object class="GtkWindow" id="EditorWindow">
     <property name="can_focus">False</property>
     <property name="title" translatable="yes">Nexted 0.1v</property>
+    <property name="default_width">800</property>
+    <property name="default_height">600</property>
     <child>
       <object class="GtkBox" id="box1">
         <property name="visible">True</property>
@@ -176,15 +178,27 @@
           </packing>
         </child>
         <child>
-          <object class="GtkTextView" id="textview">
+          <object class="GtkScrolledWindow" id="scrolledwindow">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
-            <property name="has_focus">True</property>
-            <property name="hexpand">True</property>
             <property name="vexpand">True</property>
-            <property name="border_width">3</property>
-            <property name="hscroll_policy">natural</property>
-            <property name="vscroll_policy">natural</property>
+            <property name="hscrollbar_policy">always</property>
+            <property name="vscrollbar_policy">always</property>
+            <property name="shadow_type">in</property>
+            <child>
+              <object class="GtkTextView" id="textview">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="hexpand">True</property>
+                <property name="vexpand">True</property>
+                <property name="border_width">3</property>
+                <property name="hscroll_policy">natural</property>
+                <property name="vscroll_policy">natural</property>
+                <signal name="backspace" handler="hitBackspace" swapped="no"/>
+                <signal name="copy-clipboard" handler="hitCopy" swapped="no"/>
+                <signal name="cut-clipboard" handler="hitCut" swapped="no"/>
+              </object>
+            </child>
           </object>
           <packing>
             <property name="expand">False</property>
