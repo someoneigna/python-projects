@@ -69,7 +69,7 @@ Example:
 
 
 
-####And now I have to look for a particular c and java project, so lets sort them by type and see what we got:
+####And now I have to look for a particular C and Java project, so lets sort them by type and see what we got:
 ![FinalResult](https://raw.github.com/someoneigna/python-projects/master/nforg-file_organizer/example_data/final_result.jpg)  
 
 
