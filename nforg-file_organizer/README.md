@@ -53,7 +53,7 @@ Example:
 
 
 ####Hmm, but, what if I want to separate my source code, my music from my books! Well, you can too:
-![SortingType](https://raw.github.com/someoneigna/python-projects/blob/master/nforg-file_organizer/example_data/sort_by_filetype.jpg)  
+![SortingType](https://raw.github.com/someoneigna/python-projects/master/nforg-file_organizer/example_data/sort_by_filetype.jpg)  
 
 
 
@@ -62,7 +62,7 @@ Example:
 
 
 ####Well, now I have a pdf dir, and a mp3 dir, and source code untouched. But I want my mp3 by Band/Author!!!
-![SortingInsideFolder](https://raw.github.com/someoneigna/python-projects/blob/master/nforg-file_organizer/example_data/sort_by_name_inside_mp3.jpg)  
+![SortingInsideFolder](https://raw.github.com/someoneigna/python-projects/master/nforg-file_organizer/example_data/sort_by_name_inside_mp3.jpg)  
 
 
 
@@ -70,7 +70,7 @@ Example:
 
 
 ####And now I have to look for a particular c and java project, so lets sort them by type and see what we got:
-![FinalResult](https://raw.github.com/someoneigna/python-projects/blob/master/nforg-file_organizer/example_data/final_result.jpg)  
+![FinalResult](https://raw.github.com/someoneigna/python-projects/master/nforg-file_organizer/example_data/final_result.jpg)  
 
 
 
