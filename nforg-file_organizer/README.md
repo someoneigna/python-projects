@@ -52,7 +52,7 @@ Example:
 
 
 
-####Hmm, but, what if I want to separate my source code, my music from my books! Well, you can too:
+####Hmm, but, what if I want to separate my source code, from my music and also from my books! Well, you can too:
 ![SortingType](https://raw.github.com/someoneigna/python-projects/master/nforg-file_organizer/example_data/sort_by_filetype.jpg)  
 
 
