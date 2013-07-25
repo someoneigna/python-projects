@@ -1,18 +1,43 @@
 #!/usr/bin/python
-""" Python 2.x compliant (change <> to != for Python3)
-    File organizer by type/time/name"""
+''' 
+Python 2.x compliant (change <> to != for Python3)
+File organizer by type/time/name
+
+Copyright (C) 2013 Ignacio Alvarez <someoneigna@gmail.com>
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the "Software"),
+to deal in the Software without restriction, including without limitation
+the rights to use, copy, modify, merge, publish, distribute, sublicense,
+and/or sell copies of the Software, and to permit persons to whom the
+Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included
+in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE
+OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+'''
 
 import sys, string, os, time, glob
 import shutil, filecmp
 
 DEBUG_MODE = 0
 
+#TODO: Make the arg parsing prettier, (using argparse maybe?).
+#      - Add the posibility to save a list of file moved. 
+#      - Implement sorting by date.
 def main(args):
     """Main program entry point"""
 
     arguments = check_args(args, len(args))
 
-    if arguments == "INVALID":
+    if arguments == "INVALID" or not arguments:
         print(" Invalid arguments...\n  Use \'-h\' for help.")
         return
 
@@ -21,39 +46,33 @@ def main(args):
         return
 
     directory = args[3]
+    if not directory or not os.path.exists(directory):
+        print(" Invalid directory...")
+        return
+
 
     if arguments == "VALID":
         filetypes = get_filetypes(args[2])
         classificate_dir(args[1], filetypes, directory)
         return
 
-
     if arguments == "GET_DATES":
         dates, mode = get_dates(args[1])
         classificate_dir(mode, filetypes, directory, dates)
         return
+
 
 def change_dir(directory):
     """Changes current dir and returns it"""
     if directory <> ".":
         try:
             os.chdir(directory)
+
         except IOError:
             print("Cant access {0}...\n".format(directory))
+
     return os.getcwd()
 
-def optimize(filetypes):
-    """For current dir scan valid filetypes
-        return a list of valid filetypes"""
-
-    #Remove repeated, skip if "*"
-    if filetypes == "*":
-        return ['*']
-
-    #Return elements not repeated
-    result = []
-    [result.append(x) for x in filetypes if x not in result]
-    return result
 
 def check_for_file(fname):
     """Checks if it's a valid file"""
@@ -64,7 +83,7 @@ def check_for_file(fname):
 
 
 def fix_repeated(file_a, file_b, directory):
-    """Reacts on existing files, removing or saving with a different name """
+    '''Reacts on existing files, removing or saving with a different name.'''
 
     # If the files are the exact same remove it
     if filecmp.cmp(file_a, file_b):
@@ -84,7 +103,7 @@ def move_file(fname, directory):
 
     try:
         if DEBUG_MODE:
-            print("Moving \'{origin}\' ----> \'{destiny}\'".format(origin=fname, destiny= directory + fname))
+            print("Moving \'{origin}\' ----> \'{destiny}\'".format(origin=fname, destiny=directory + fname))
         shutil.move(fname, directory)
 
     except shutil.Error:
@@ -93,28 +112,28 @@ def move_file(fname, directory):
         fix_repeated(fname, fullpath, directory)
 
 
-def organize_by_symbols(orig_filetypes, directory):
+def organize_by_symbols(filetypes, directory):
     """Organize files starting with "(,),-,_" """
 
     current_dir = change_dir(directory)
-
-    filetypes = optimize(orig_filetypes)
 
     files_processed = 0
     valid = "$()=-_"
     
     for filetype in filetypes:
+        
         match = ''.join("[$()=-_]*" + "." + filetype)
+
         # For matched file in dir
         for fname in glob.iglob(match):
 
             files_processed += 1
 
             # If folder for current letter doesn't exists
-            if os.path.exists("#misc-symbols" + "/") == False :
+            if not os.path.exists("#misc-symbols" + "/"):
                 os.mkdir("#misc-symbols")
 
-            move_file(fname,"#misc-symbols" + "/")
+            move_file(fname, "#misc-symbols" + "/")
 
     if current_dir <> directory:
         change_dir("..")
@@ -122,12 +141,12 @@ def organize_by_symbols(orig_filetypes, directory):
     return files_processed
 
 
-def organize_by_name(orig_filetypes, mode, directory):
-    """Organize by name mode (-n and -n+)"""
-
+def organize_by_name(filetypes, directory):
+    '''Organize by name mode used in (-n and -n+)'''
     current_dir = change_dir(directory)
+    if(directory == current_dir and directory <> '.'):
+        return #Hmm, instead rise a exception
 
-    filetypes = optimize(orig_filetypes)
     files_processed = 0
     
     # For every chosen filetype
@@ -143,7 +162,7 @@ def organize_by_name(orig_filetypes, mode, directory):
             dir_letter = fname[0].upper()
             directory = dir_letter + "/"
             
-            if os.path.exists(directory) == False:
+            if not os.path.exists(directory):
                 os.mkdir(dir_letter)
 
             move_file(fname, directory)
@@ -159,14 +178,15 @@ def organize_by_name(orig_filetypes, mode, directory):
 #    return 0"""
 
 
-def organize_by_filetype(orig_filetypes, directory):
+def organize_by_filetype(filetypes, directory):
     """Organize by filetype mode (-f)"""
-
-    filetypes = optimize(orig_filetypes)
 
     files_processed = 0
 
     current_dir = change_dir(directory)
+    if(directory == current_dir and directory <> '.'):
+        return #Hmm, instead rise a exception
+
 
     for ftype in filetypes:
         for fname in glob.glob("*." + ftype):
@@ -178,19 +198,18 @@ def organize_by_filetype(orig_filetypes, directory):
 
             # If folder for current file filetype doesn't exists
             dirname = filetype + "/" 
-            if os.path.exists(dirname) == False :
+            
+            if not os.path.exists(dirname):
                 os.mkdir(filetype)
             move_file(fname, dirname)
-
-
         #for end
-    # for end
+    #for end
     if current_dir <> directory:
         os.chdir("..")
 
     return files_processed
 
-
+#TODO: Refactor this mess
 def classificate_dir(mode, filetypes, directory, dates=0):
     """Calls the corresponding function to sort files in selected mode"""
 
@@ -198,20 +217,27 @@ def classificate_dir(mode, filetypes, directory, dates=0):
     init_time = time.ctime()
 
     if mode == "-n" or mode == "-n+":
-        files_classified = organize_by_name(filetypes, mode, directory)
+        files_classified = organize_by_name(filetypes, directory)
 
         if mode == "-n+":
             files_classified += organize_by_symbols(filetypes, directory)
 
     elif mode == "-tf" or mode == "-te": # time frame and time exact date modes
         #files_classified = organize_by_date(mode, filetypes, directory, dates)
-        pass
+        print("Uninplemented yet... Sorry")
+        return
 
     elif mode == "-f":
         files_classified = organize_by_filetype(filetypes, directory)
 
+    else:
+        print("Mode inexistant, exiting....")
+        return 
+
+
     if files_classified == 0:
         print("No files were organized. Ending...")
+
     else:
         if(files_classified > 1):
             file_str = "files"
@@ -253,7 +279,7 @@ def check_args(argv, args):
     """Checks and validates arguments"""
 
     global DEBUG_MODE
-    valid_args = ("-n", "-n+", "-t", "-f", "-h")
+    valid_args = {"-n", "-n+", "-t", "-f", "-h"}
 
     if args == 1 or argv[1] not in valid_args:
         return "INVALID"
@@ -278,7 +304,8 @@ def get_filetypes(arg):
         return "*"
 
     else:
-        filetypes = arg.split(",")
+        filetypes = arg.strip() #Remove possible whitespace input example: "pdf, png, tar"
+        filetypes = {x for x in filetypes.split(",")} #Split "pdf,png,tar" into a set -> {pdf, png, tar}
         return filetypes
 
     return "ERROR"

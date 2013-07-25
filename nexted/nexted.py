@@ -27,7 +27,7 @@ from window import Window
 from gi.repository import Gtk
 
 #TODO: Find a pretty way to pass command line parameter xD
-def main(*args):
+def main():
     start_file = args[0]
     win = Window(start_file)
     window = win.get_window()
@@ -36,9 +36,9 @@ def main(*args):
     Gtk.main()
 
 if __name__ == "__main__":
-    if len(sys.argv) > 1:
-        fullroute = ''.join(os.getcwd() + '/' + sys.argv[1])
-        print(fullroute)
+:close
+
+        fullroute = ''.join(os.getcwd(), '/', sys.argv[1])
         main(fullroute)
     else:
         main()
