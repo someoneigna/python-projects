@@ -38,7 +38,12 @@ class Window:
         self.title = self.window.get_title()
 
         #Contains a Editor
-        self.editor = Editor(builder.get_object("textview"))
+
+        #self.eb = Gtk.EventBox()
+        self.textview = builder.get_object("textview")
+        #self.eb.add(self.textview)
+        #self.eb.modify_bg(Gtk.StateNormal, Gtk.gdk.color_parse("blue"))
+        self.editor = Editor(self.textview)
 
         #And a statusbar
         self.statusbar = builder.get_object("statusbar")
@@ -58,7 +63,8 @@ class Window:
                 'hitBackspace': self.onHitBackspace,
                 'hitCut': self.onHitCut,
                 'onUpdateStatusTextPush': self.onUpdateStatusTextPush,
-                'onUpdateStatusTextPop': self.onUpdateStatusTextPop
+                'onUpdateStatusTextPop': self.onUpdateStatusTextPop,
+                'onChooseFont': self.onChooseFont
         }
         builder.connect_signals(signals)
 
@@ -80,11 +86,23 @@ class Window:
     def onAboutInfo(self, data):
         pass
 
+    def onChooseFont(self, data):
+        dialog = Gtk.FontSelectionDialog("Choose a font")
+        preview_text = """#include<stdio.h>
+                           int main()
+                           {
+                                printf("Do you like this font?'\\n);
+                                return 0;
+                           }"""
+        dialog.set_preview_text(preview_text)
+        response = dialog.run()
+        dialog.destroy()
+
     def onFileInexistant(self, filename):
         """Warn about commandline passed file not existing"""
         file_basename = os.path.basename(filename)
         path = os.path.dirname(filename)
-        message = ''.join(file_basename + " in " + path + " doesn't exists.")
+        message = ''.join('File: ' + file_basename + '\nIn: ' + path + " doesn't exists.")
 
         dialog = Gtk.MessageDialog(
                 None, 0,Gtk.MessageType.WARNING,
@@ -196,7 +214,9 @@ class Window:
             status = self.editor.open_file(self.current_filename)
             if status == "INEXISTANT":
                 self.onFileInexistant(self.current_filename)
-        self.update_title()
+            self.update_title()
+        else:
+            return
 
     def onOpenFile(self, data):
         dialog = Gtk.FileChooserDialog("Choose file to open", None,\

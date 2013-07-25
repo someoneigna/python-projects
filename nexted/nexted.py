@@ -27,8 +27,7 @@ from window import Window
 from gi.repository import Gtk
 
 #TODO: Find a pretty way to pass command line parameter xD
-def main():
-    start_file = args[0]
+def main(start_file=None):
     win = Window(start_file)
     window = win.get_window()
     window.connect("delete-event", Gtk.main_quit)
@@ -36,9 +35,8 @@ def main():
     Gtk.main()
 
 if __name__ == "__main__":
-:close
-
-        fullroute = ''.join(os.getcwd(), '/', sys.argv[1])
+    if len(sys.argv) > 1:
+        fullroute = ''.join(os.getcwd() + '/' + sys.argv[1])
         main(fullroute)
     else:
-        main()
+        main(None)

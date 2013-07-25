@@ -20,7 +20,7 @@ DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE
 OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
-
+from gi.repository import Gtk, Gdk
 from file import File
 
 class Editor:
@@ -30,6 +30,9 @@ class Editor:
         self.textbuffer = self.textview.get_buffer()
         self.file_handle = File()
         self.textbuffer.set_modified(False)
+
+    def set_font(self, font):
+        pass
 
     def clean_buffer(self):
         startIter, endIter = self.textbuffer.get_start_iter(),\
