@@ -101,7 +101,7 @@ What can and cannot nforge currently do:
 If you know of a feature that you could really found helpful just let me now. I will be more than happy to include it.  
 
 
-P.D: Currently more test cases are needed to **ENSURE** you that is safe to use it, but it shouldn't break your files.
+P.D: Currently more test cases are needed to **ENSURE** you that is safe to use, but it shouldn't break your files.
 At most a file could end in a weird folder. But neitter has happened to me. I use it regularly. Anyway, use it **IN YOUR
 OWN RISK**.  
 
