@@ -64,7 +64,8 @@ class Window:
                 'hitCut': self.onHitCut,
                 'onUpdateStatusTextPush': self.onUpdateStatusTextPush,
                 'onUpdateStatusTextPop': self.onUpdateStatusTextPop,
-                'onChooseFont': self.onChooseFont
+                'onChooseFont': self.onChooseFont,
+                'onChooseColor': self.onChooseColor
         }
         builder.connect_signals(signals)
 
@@ -73,6 +74,10 @@ class Window:
 
     def get_window(self):
         return self.window
+
+    def setEditorColor(self, fg, bg):
+        self.textview.modify_bg(Gtk.StateType.NORMAL, bg)
+        self.textview.modify_fg(Gtk.StateType.NORMAL, fg)
 
 
 
@@ -84,17 +89,23 @@ class Window:
     def onHitCopy(self, data):
         pass
     def onAboutInfo(self, data):
-        pass
+        dialog = Gtk.AboutDialog()
+        dialog.set_authors("Ignacio Alvarez <someoneigna@gmail.com>")
+        dialog.set_program_name("Nexted")
+        dialog.set_version("0.1v")
+        dialog.set_license(open("LICENSE", "r").read())
+        dialog.set_website("https://github.com/someoneigna/python-projects/tree/master/nexted")
+        dialog.set_website_label("Nexted github repository")
+        dialog.run()
+        dialog.destroy()
 
     def onChooseFont(self, data):
         dialog = Gtk.FontSelectionDialog("Choose a font")
-        preview_text = """#include<stdio.h>
-                           int main()
-                           {
-                                printf("Do you like this font?'\\n);
-                                return 0;
-                           }"""
-        dialog.set_preview_text(preview_text)
+        preview_text = "#include<stdio.h>\n"\
+                "int main(){\n"\
+                "    printf(\"Do you like this font?\\n\");\n"\
+                "    return 0;\n}"
+        dialog.set_preview_text(preview_text.decode('ascii'))
         response = dialog.run()
         dialog.destroy()
 
@@ -102,7 +113,8 @@ class Window:
         """Warn about commandline passed file not existing"""
         file_basename = os.path.basename(filename)
         path = os.path.dirname(filename)
-        message = ''.join('File: ' + file_basename + '\nIn: ' + path + " doesn't exists.")
+        message = ''.join('File: ' + file_basename + \
+                '\nIn: ' + path + " doesn't exists.")
 
         dialog = Gtk.MessageDialog(
                 None, 0,Gtk.MessageType.WARNING,
@@ -113,36 +125,6 @@ class Window:
         dialog.destroy()
         self.current_filename = "Unnamed"
         self.update_title()
-
-    #TODO: find out the correct way to use Gtk.StatusBar
-    def onUpdateStatusTextPush(self, data):
-#        self.textview.get_buffer().set_modified(True)
-#        text_buffer = self.textview.get_buffer()
-#        chars = text_buffer.get_char_count()
-#        lines = text_buffer.get_line_count()
-#        text_info = "Lines:{lines} | Chars:{chars}".\
-#        format(lines= lines, chars= chars)
-#
-#        statusbar_context =  self.statusbar.get_context()
-#        self.statusbar.remove_all(statusbar_context)
-#        self.statusbar.push(statusbar_context, text_info )
-        pass
-
-    def onUpdateStatusTextPop(self, data):
-#        self.textview.get_buffer().set_modified(True)
-#        text_buffer = self.textview.get_buffer()
-#        chars = text_buffer.get_char_count()
-#        lines = text_buffer.get_line_count()
-#        text_info = "Lines:{lines} | Chars:{chars}".\
-#        format(lines= lines, chars= chars)
-#        statusbar_context =  self.statusbar.get_context()
-#        self.statusbar.remove_all(statusbar_context)
-#        self.statusbar.push(statusbar_context, text_info )
-        pass
-
-    def onQuit(self, data):
-        self.editor.exit()
-        raise "QUIT"
 
     def askReplace(self):
         dialog = Gtk.MessageDialog(None, 0, Gtk.MessageType.WARNING,
@@ -188,7 +170,7 @@ class Window:
                                        Gtk.FileChooserAction.SAVE,\
                                        (Gtk.STOCK_CANCEL,\
                                         Gtk.ResponseType.CANCEL,\
-                                        Gtk.STOCK_OPEN,\
+                                        Gtk.STOCK_SAVE,\
                                         Gtk.ResponseType.OK))
         dialog.set_current_folder(os.getcwd())
         response = dialog.run()
@@ -218,6 +200,27 @@ class Window:
         else:
             return
 
+    def onChooseColor(self, data):
+        color_fg, color_bg = 0, 0
+        dialog = Gtk.ColorSelectionDialog("Choose editor foreground")
+        response = dialog.run()
+        if response == Gtk.ResponseType.OK:
+            color_fg = dialog.get_color_selection().get_current_color()
+
+        dialog.destroy()
+
+        dialog = Gtk.ColorSelectionDialog("Choose editor background")
+        response = dialog.run()
+        if response == Gtk.ResponseType.OK:
+            color_bg = dialog.get_color_selection().get_current_color()
+        else:
+            return
+
+
+        dialog.destroy()
+
+        self.setEditorColor(color_fg, color_bg)
+
     def onOpenFile(self, data):
         dialog = Gtk.FileChooserDialog("Choose file to open", None,\
                                     Gtk.FileChooserAction.OPEN,\
@@ -234,6 +237,38 @@ class Window:
             self.editor.new_file(self.current_filename)
         dialog.destroy()
         self.update_title()
+
+    #TODO: find out the correct way to use Gtk.StatusBar
+    def onUpdateStatusTextPush(self, data):
+#        self.textview.get_buffer().set_modified(True)
+#        text_buffer = self.textview.get_buffer()
+#        chars = text_buffer.get_char_count()
+#        lines = text_buffer.get_line_count()
+#        text_info = "Lines:{lines} | Chars:{chars}".\
+#        format(lines= lines, chars= chars)
+#
+#        statusbar_context =  self.statusbar.get_context()
+#        self.statusbar.remove_all(statusbar_context)
+#        self.statusbar.push(statusbar_context, text_info )
+        pass
+
+    def onUpdateStatusTextPop(self, data):
+#        self.textview.get_buffer().set_modified(True)
+#        text_buffer = self.textview.get_buffer()
+#        chars = text_buffer.get_char_count()
+#        lines = text_buffer.get_line_count()
+#        text_info = "Lines:{lines} | Chars:{chars}".\
+#        format(lines= lines, chars= chars)
+#        statusbar_context =  self.statusbar.get_context()
+#        self.statusbar.remove_all(statusbar_context)
+#        self.statusbar.push(statusbar_context, text_info )
+        pass
+
+    def onQuit(self, data):
+        self.editor.exit()
+        raise "QUIT"
+
+
 
 
 
