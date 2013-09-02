@@ -93,7 +93,7 @@ What can and cannot nforge currently do:
 
 **Cannot**
 * Handle more than one command operation at the time. (you can a make a script for that)
-* Be stop to continue before.
+* Be stopped to continue latter.
 * Save a list of files sorted with details. (this is unneeded most of the time, you can use tree and grep, etc)  
 
 
