@@ -1,0 +1,2 @@
+    A simple stopwatch made with PyGTK3. Gets a time difference, and you
+can save the record with a description.
