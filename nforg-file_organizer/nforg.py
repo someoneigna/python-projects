@@ -1,5 +1,5 @@
 #!/usr/bin/python
-''' 
+'''
 Python 2.x compliant (change <> to != for Python3)
 File organizer by type/time/name
 
@@ -14,7 +14,6 @@ Software is furnished to do so, subject to the following conditions:
 
 The above copyright notice and this permission notice shall be included
 in all copies or substantial portions of the Software.
-
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
 OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
@@ -24,13 +23,13 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE
 OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 '''
 
-import sys, string, os, time, glob
+import sys, os, time, glob, re
 import shutil, filecmp
 
 DEBUG_MODE = 0
 
 #TODO: Make the arg parsing prettier, (using argparse maybe?).
-#      - Add the posibility to save a list of file moved. 
+#      - Add the posibility to save a list of file moved.
 #      - Implement sorting by date.
 def main(args):
     """Main program entry point"""
@@ -71,7 +70,9 @@ def change_dir(directory):
         except IOError:
             print("Cant access {0}...\n".format(directory))
 
-    return os.getcwd()
+        return os.getcwd()
+    else:
+        return directory
 
 
 def check_for_file(fname):
@@ -92,7 +93,7 @@ def fix_repeated(file_a, file_b, directory):
         # else we save rename and append -diff in route/'filename + diff'
         backup_filename = file_a + "-diff"
         fullroute = directory + backup_filename
-        
+
         print("Saving as: {fullroute}\n".format(fullroute=fullroute))
         os.rename(file_a, backup_filename)
         shutil.move(backup_filename, fullroute)
@@ -113,16 +114,18 @@ def move_file(fname, directory):
 
 
 def organize_by_symbols(filetypes, directory):
-    """Organize files starting with "(,),-,_" """
+    '''Organize files starting with "(,),-,_[]'''
 
-    current_dir = change_dir(directory)
+    start_dir = os.getcwd()
+
+    if os.path.exists(os.path.relpath(directory)):
+        current_dir = change_dir(directory)
 
     files_processed = 0
-    valid = "$()=-_"
-    
+
     for filetype in filetypes:
-        
-        match = ''.join("[$()=-_]*" + "." + filetype)
+
+        match = ''.join(' [][()$-_=]*' + '.' + filetype)
 
         # For matched file in dir
         for fname in glob.iglob(match):
@@ -135,40 +138,41 @@ def organize_by_symbols(filetypes, directory):
 
             move_file(fname, "#misc-symbols" + "/")
 
-    if current_dir <> directory:
-        change_dir("..")
+    if current_dir <>  start_dir:
+        change_dir(start_dir)
 
     return files_processed
 
 
 def organize_by_name(filetypes, directory):
     '''Organize by name mode used in (-n and -n+)'''
-    current_dir = change_dir(directory)
-    if(directory == current_dir and directory <> '.'):
-        return #Hmm, instead rise a exception
+    start_dir = os.getcwd()
+
+    if os.path.exists(os.path.relpath(directory)):
+        current_dir = change_dir(directory)
 
     files_processed = 0
-    
+
     # For every chosen filetype
     for filetype in filetypes:
-       
+
         # For every file on dir
-        match = ''.join("[A-Za-z0-9]*" + "." + filetype)
-        
+        match = ''.join("^[A-Za-z0-9]*" + "." + filetype)
+
         for fname in glob.iglob(match):
             files_processed += 1
 
             # If folder for current letter doesn't exists
             dir_letter = fname[0].upper()
             directory = dir_letter + "/"
-            
+
             if not os.path.exists(directory):
                 os.mkdir(dir_letter)
 
             move_file(fname, directory)
 
-    if current_dir <> directory:
-        change_dir("..")
+    if current_dir <> start_dir:
+        change_dir(start_dir)
 
     return files_processed
 
@@ -183,29 +187,30 @@ def organize_by_filetype(filetypes, directory):
 
     files_processed = 0
 
-    current_dir = change_dir(directory)
-    if(directory == current_dir and directory <> '.'):
-        return #Hmm, instead rise a exception
+    start_dir = os.getcwd()
+
+    if os.path.exists(os.path.relpath(directory)):
+        current_dir = change_dir(directory)
 
 
     for ftype in filetypes:
         for fname in glob.glob("*." + ftype):
 
             files_processed += 1
-            
+
             #Get filetype from filename
             filetype = fname.partition(".")[2]
 
             # If folder for current file filetype doesn't exists
-            dirname = filetype + "/" 
-            
+            dirname = filetype + "/"
+
             if not os.path.exists(dirname):
                 os.mkdir(filetype)
             move_file(fname, dirname)
         #for end
     #for end
-    if current_dir <> directory:
-        os.chdir("..")
+    if current_dir <> start_dir:
+        change_dir(start_dir)
 
     return files_processed
 
@@ -224,7 +229,7 @@ def classificate_dir(mode, filetypes, directory, dates=0):
 
     elif mode == "-tf" or mode == "-te": # time frame and time exact date modes
         #files_classified = organize_by_date(mode, filetypes, directory, dates)
-        print("Uninplemented yet... Sorry")
+        print("Not implemented yet... Sorry")
         return
 
     elif mode == "-f":
@@ -232,7 +237,7 @@ def classificate_dir(mode, filetypes, directory, dates=0):
 
     else:
         print("Mode inexistant, exiting....")
-        return 
+        return
 
 
     if files_classified == 0:
@@ -243,7 +248,7 @@ def classificate_dir(mode, filetypes, directory, dates=0):
             file_str = "files"
         else:
             file_str = "file"
-        
+
         entries = {
                     'quantity': files_classified, 'files': file_str,
                     'start': init_time, 'end': time.ctime()
@@ -272,7 +277,7 @@ def print_help():
     \n\n\t\tnforg.py -t \"12/04/2008 8/06/2009\" \"doc\" .\n\
     """
 
-    print(help_string % (indent, indent, indent, indent))
+    print(help_string.format(indent, indent, indent, indent))
 
 
 def check_args(argv, args):
@@ -281,12 +286,14 @@ def check_args(argv, args):
     global DEBUG_MODE
     valid_args = {"-n", "-n+", "-t", "-f", "-h"}
 
-    if args == 1 or argv[1] not in valid_args:
-        return "INVALID"
-
     #argv[1] is valid then check for debug mode
     if "d" in argv[1]:
         DEBUG_MODE = 1
+        argv[1] = argv[1].replace('d', '')
+
+    if args <= 1 or argv[1] not in valid_args:
+        return "INVALID"
+
 
     if(args < 4 or argv[1] == "-h"):
         return "HELP"
