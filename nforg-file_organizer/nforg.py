@@ -32,7 +32,7 @@ DEBUG_MODE = 0
 #      - Add the posibility to save a list of file moved.
 #      - Implement sorting by date.
 def main(args):
-    """Main program entry point"""
+    '''Main program entry point'''
 
     arguments = check_args(args, len(args))
 
@@ -62,7 +62,7 @@ def main(args):
 
 
 def change_dir(directory):
-    """Changes current dir and returns it"""
+    '''Changes current dir and returns it'''
     if directory <> ".":
         try:
             os.chdir(directory)
@@ -76,7 +76,7 @@ def change_dir(directory):
 
 
 def check_for_file(fname):
-    """Checks if it's a valid file"""
+    '''Checks if it's a valid file'''
 
     return not(os.path.islink(fname) or \
             os.path.isdir(fname) or \
@@ -100,7 +100,7 @@ def fix_repeated(file_a, file_b, directory):
 
 
 def move_file(fname, directory):
-    """Move a file into specified dir, and checks for existing files"""
+    '''Move a file into specified dir, and checks for existing files'''
 
     try:
         if DEBUG_MODE:
@@ -183,7 +183,7 @@ def organize_by_name(filetypes, directory):
 
 
 def organize_by_filetype(filetypes, directory):
-    """Organize by filetype mode (-f)"""
+    '''Organize by filetype mode (-f)'''
 
     files_processed = 0
 
@@ -216,12 +216,12 @@ def organize_by_filetype(filetypes, directory):
 
 #TODO: Refactor this mess
 def classificate_dir(mode, filetypes, directory, dates=0):
-    """Calls the corresponding function to sort files in selected mode"""
+    '''Calls the corresponding function to sort files in selected mode'''
 
     files_classified = 0
     init_time = time.ctime()
 
-    if mode == "-n" or mode == "-n+":
+    if "-n" in mode:
         files_classified = organize_by_name(filetypes, directory)
 
         if mode == "-n+":
@@ -244,15 +244,13 @@ def classificate_dir(mode, filetypes, directory, dates=0):
         print("No files were organized. Ending...")
 
     else:
-        if(files_classified > 1):
-            file_str = "files"
-        else:
-            file_str = "file"
+        file_str = "files" if(files_classified > 1) else "file"
 
         entries = {
                     'quantity': files_classified, 'files': file_str,
                     'start': init_time, 'end': time.ctime()
                   }
+
         #I really have to improve this
         message = """\n {0} {1} were organized.\n\n\
                 Started at:\n\t{2}\n  \
@@ -261,7 +259,7 @@ def classificate_dir(mode, filetypes, directory, dates=0):
 
 
 def print_help():
-    """Print help string"""
+    '''Print help string'''
 
     indent = "\t  "
 
@@ -281,7 +279,7 @@ def print_help():
 
 
 def check_args(argv, args):
-    """Checks and validates arguments"""
+    '''Checks and validates arguments'''
 
     global DEBUG_MODE
     valid_args = {"-n", "-n+", "-t", "-f", "-h"}
@@ -305,7 +303,7 @@ def check_args(argv, args):
 
 
 def get_filetypes(arg):
-    """Parses filetypes from third argument"""
+    '''Parses filetypes from third argument'''
 
     if arg == "*":
         return "*"
@@ -319,7 +317,7 @@ def get_filetypes(arg):
 
 
 def get_dates(line):
-    """Gets date and mode"""
+    '''Gets date and mode'''
 
     dates = []
 
